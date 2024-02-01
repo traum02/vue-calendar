@@ -78,7 +78,7 @@
 import { PropType, onMounted, ref, watch } from 'vue';
 import ScheduleEvent from './ScheduleEvent.vue';
 import SchedulePopup from './SchedulePopup.vue';
-import { type restData, type dateSet, type popupConfig, type scheduleData, EVENT_COLORS, convertDatetoString, diffMonth } from "./ScheduleDashBoardRest";
+import { type restData, type dateSet, type popupConfig, type scheduleData, convertDatetoString, diffMonth } from "./ScheduleDashBoardRest";
 
 const days = ["일", "월", "화", "수", "목", "금", "토"];
 const currentYear = ref(0 as number);
@@ -147,7 +147,6 @@ function editEvent(e: restData) {
 }
 
 function deleteEvent(e: restData) {
-  console.log(e)
   emit('delete-event', e);
   closeEvent();
 }
@@ -178,12 +177,6 @@ function getDate(year: number, month: number) {
 
   return {start: date1, end: date2};
 }
-
-function dayCount(day: number) {
-  return (
-    objDates.value[day].event?.length??0
-  );
-};
 
 // day cell 클릭
 async function clickDay(value: dateSet) {

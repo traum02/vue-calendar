@@ -184,7 +184,7 @@ import { EVENT_COLORS, type popupConfig, type scheduleData } from './ScheduleDas
   }
 
   // 삭제
-  function deleteEvent(e: scheduleData) {
+  function deleteEvent() {
     if(!data.value.seq) {
       alert("seq 오류")
     }

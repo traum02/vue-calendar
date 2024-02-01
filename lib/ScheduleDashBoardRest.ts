@@ -1,5 +1,5 @@
 // import { useRest } from "@ubuilder/auth";
-const baseUrl = "/schedule/dashboard";
+// const baseUrl = "/schedule/dashboard";
 
 export interface scheduleData {
     seq?: number,
@@ -84,8 +84,8 @@ export function formatDate(dt: string, dtTime: string | null) {
     const year = date.getFullYear();
     const month = date.getMonth() + 1;
     const day = date.getDate();
-    const hh = date.getHours();
-    const mm = date.getMinutes();
+    // const hh = date.getHours();
+    // const mm = date.getMinutes();
 
     const strDate = [year, month.toString().padStart(2, "0"), day.toString().padStart(2, "0")].join("-");
     const strTime = dtTime??"";
@@ -93,36 +93,36 @@ export function formatDate(dt: string, dtTime: string | null) {
     return strDate+(dtTime!=null?" "+strTime:"");
 }
 
-export async function getSearch(frDt: Date, toDt: Date) {
-    const url = `${baseUrl}`;
-    const date1 = convertDatetoString(frDt);
-    const date2 = convertDatetoString(toDt);
-    try {
-        let raw: scheduleData[] = await useRest().get(url, {frDt: date1, toDt: date2});
-        return raw
+// export async function getSearch(frDt: Date, toDt: Date) {
+//     const url = `${baseUrl}`;
+//     const date1 = convertDatetoString(frDt);
+//     const date2 = convertDatetoString(toDt);
+//     try {
+//         let raw: scheduleData[] = await useRest().get(url, {frDt: date1, toDt: date2});
+//         return raw
 
-    } catch (e: any) {
-        console.log(e);
-    }
-}
+//     } catch (e: any) {
+//         console.log(e);
+//     }
+// }
 
 export async function createData(e: restData) {
     if(!e) throw new Error('Error data.');
-    const url = `${baseUrl}`;
-    const param = {
-        schdtFrom: e.date.startdt,
-        schdtTo: e.date.enddt,
-        timeFrom: e.date.starttime,
-        timeTo: e.date.endtime,
-        title: e.title,
-        place: e.place,
-        contents: e.contents,
-        refUser: e.refUser,
-    };
+    // const url = `${baseUrl}`;
+    // const param = {
+    //     schdtFrom: e.date.startdt,
+    //     schdtTo: e.date.enddt,
+    //     timeFrom: e.date.starttime,
+    //     timeTo: e.date.endtime,
+    //     title: e.title,
+    //     place: e.place,
+    //     contents: e.contents,
+    //     refUser: e.refUser,
+    // };
 
 
     try {
-        await useRest().post(url, param);
+        // await useRest().post(url, param);
     } catch (e: any) {
         console.log(e);
     } finally {
@@ -132,36 +132,36 @@ export async function createData(e: restData) {
 
 export async function modifyData(e: restData) {
     if(!e) throw new Error('Error data.');
-    const url = `${baseUrl}`;
-    const param = {
-        seq: e.seq,
-        schdtFrom: e.date.startdt,
-        schdtTo: e.date.enddt,
-        timeFrom: e.date.starttime,
-        timeTo: e.date.endtime,
-        title: e.title,
-        place: e.place,
-        contents: e.contents,
-        refUser: e.refUser,
-        crtUsrId: e.crtUsrId,
-        crtDt: e.crtDt
-    };
+    // const url = `${baseUrl}`;
+    // const param = {
+    //     seq: e.seq,
+    //     schdtFrom: e.date.startdt,
+    //     schdtTo: e.date.enddt,
+    //     timeFrom: e.date.starttime,
+    //     timeTo: e.date.endtime,
+    //     title: e.title,
+    //     place: e.place,
+    //     contents: e.contents,
+    //     refUser: e.refUser,
+    //     crtUsrId: e.crtUsrId,
+    //     crtDt: e.crtDt
+    // };
 
 
-    try {
-        await useRest().put(url, param);
-    } catch (e: any) {
-        console.log(e);
-    } finally {
+    // try {
+    //     // await useRest().put(url, param);
+    // } catch (e: any) {
+    //     console.log(e);
+    // } finally {
 
-    }
+    // }
 }
 
 export async function deleteData(seq: number) {
     if(!seq) throw new Error('Error seq.');
-    const url = `${baseUrl}/${seq}`;
+    // const url = `${baseUrl}/${seq}`;
     try {
-        await useRest().delete(url);
+        // await useRest().delete(url);
     } catch (e: any) {
         console.log(e);
     } finally {

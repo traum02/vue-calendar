@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ScheduleCalendar from "../lib/ScheduleCalendar.vue";
 import { ref } from 'vue';
-import { scheduleData } from '../lib/type/schedule';
+import { type scheduleData } from '../lib/type/schedule';
 
 const eventData = ref<scheduleData[]>({} as scheduleData[]);
 </script>
