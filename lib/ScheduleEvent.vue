@@ -12,7 +12,8 @@
 
 <script lang="ts" setup>
 import { computed, PropType } from 'vue';
-import { EVENT_COLORS, scheduleData, convertDatetoString } from './ScheduleDashBoardRest';
+import { convertDatetoString } from '@/components/rest/schedule/ScheduleDashBoardRest';
+import { EVENT_COLORS, type scheduleData } from "@/components/type/schedule";
 
 const props = defineProps({
   event: Object as PropType<scheduleData>,
@@ -50,14 +51,6 @@ const emit = defineEmits(['clickEvent']);
 //css value
 const defaultColor = EVENT_COLORS.brown;
 const fontSize = "0.688rem";
-
-export interface popupConfig {
-    isVisible: boolean,
-    isEditable: boolean,    // 수정 권한 여부
-    readonly: boolean,      // 수정 여부
-    title: string,          // 휴일 이름
-    calendarType?: string,  // 휴일, 일정 여부
-}
 
 function onClickEvent() {
   emit("clickEvent", props.date, props.event);

@@ -1,67 +1,42 @@
 <template>
-  <section class="calendarLayout" style="height: 100%">
-    <div class="month">
-      <ul>
-        <li class="prev">
-          <li class="fontsize">{{ year }}. {{ month }}</li>
-        </li>
-        <li class="next">
-          <button @click="calenderData(-1)">
-            <img src="./assets/common/ico_arrowRight2.png" alt="leftarrow" style="transform: rotate(180deg)"/>
-          </button>
-          <button @click="getToday">금일</button>
-          <button @click="calenderData(1)">
-            <img src="./assets/common/ico_arrowRight2.png" alt="rightarrow" />
-          </button>
-          <input class="datepicker" type="month" v-model="selectedMonth" @change="calenderData(diffMonth(new Date(selectedMonth+'-01'), new Date(year, month, 1)))"/>
-        </li>
-      </ul>
-    </div>
-    <div style="height: 100%">
-      <div class="weekdays">
-        <div v-for="(day, idx) in days" :key="idx" :class="'day' + idx">
-          {{ day }}
-        </div>
-      </div>
-      <div class="days">
-        <div
-          v-for="(date, idx) in objDates"
-          :key="idx"
-          style="cursor: pointer;"
-          :class="{
-            'prev-day': date.month !== month,
-            'to-day': date.day === selectedDay && date.month === month,
-            ['day' + (idx % 7)]: true,
-            'first-line': (idx / 7)<1?true: false,
-            'mid-line': (idx / 7)>=1?true: false,
-            'last-line': (objDates.length-idx)<=7?true: false,
-          }"
-          @click.stop.prevent="clickDay(date)"
-        >
-          <div class="day" :class="{'today': date.year === currentYear && date.day === today && date.month === currentMonth}">
-            {{ date.day }}
-          </div>
-          <!-- <div
-            v-if="date.month === month"
-            class="schedule-box"
-            :class="{
-              'today-schedule': date.day === today && date.month === month,
-            }"
-          >
-            {{ dayCount(date.day) }}
-          </div> -->
-          <div>
-            <ScheduleEvent 
-              v-for="(e, idx) in date.event"
-              :key="`event${date.day}-${idx}`"
-              :cnt="idx"
-              :event="e" 
-              :date="returnStrDate(year, month, date.day)"
-              @click-event="onClickEvent"
-            />
-          </div>
-        </div>
-      </div>
+  <section class="calendarLayout" style="height: 90%">
+    <Header 
+      @calender-data="calenderData" 
+      @get-today="getToday" 
+      :year="year"
+      :month="month"
+      v-model:calenderType="calenderType"
+      v-model:selectedMonth="selectedMonth"
+      v-model:selectedWeek="selectedWeek"
+    ></Header>
+    <!-- {{ calenderType }}{{ selectedMonth }} -->
+    <div class="mainLayout">
+      <Month 
+        v-if="calenderType=='month'"
+        :events="props.events"
+        :year="year"
+        :month="month"
+        @click-day="clickDay"
+        @click-event="onClickEvent"
+        @edit-event="emit('edit-event', $event)"
+        @save-event="emit('save-event', $event)"
+        @delete-event="emit('delete-event', $event)"
+        @update-day="emit('update-day', $event)"
+      />
+      <Week
+        v-if="calenderType=='week'"
+        :events="props.events"
+        :year="year"
+        :month="month"
+        :selectedWeek="selectedWeek"
+        :objDates="objDates"
+        @click-day="clickDay"
+        @click-event="onClickEvent"
+        @edit-event="emit('edit-event', $event)"
+        @save-event="emit('save-event', $event)"
+        @delete-event="emit('delete-event', $event)"
+        @update-day="emit('update-day', $event)"
+      />
     </div>
     <SchedulePopup 
       :event="selectedEvent" 
@@ -75,10 +50,13 @@
 </template>
 
 <script lang="ts" setup>
-import { PropType, onMounted, ref, watch } from 'vue';
-import ScheduleEvent from './ScheduleEvent.vue';
+import { PropType, onMounted, ref } from 'vue';
 import SchedulePopup from './SchedulePopup.vue';
-import { type restData, type dateSet, type popupConfig, type scheduleData, EVENT_COLORS, convertDatetoString, diffMonth } from "./ScheduleDashBoardRest";
+import Header from './ScheduleHeader.vue';
+import Month from './ScheduleMonth.vue';
+import Week from './ScheduleWeek.vue';
+import { convertDatetoString, diffMonth } from "./ScheduleDashBoardRest";
+import { type dateSet, type popupConfig, type restData, type scheduleData } from "./type/schedule";
 
 const days = ["일", "월", "화", "수", "목", "금", "토"];
 const currentYear = ref(0 as number);
@@ -88,6 +66,7 @@ const month = ref(0 as number);
 const today = ref(0 as number);
 const selectedDay = ref(0 as number);
 const selectedEvent = ref({} as scheduleData);
+const calenderType = ref("month" as string);
 const config = ref({
   isVisible: false,
   isEditable: true,    // 수정 권한 여부
@@ -97,7 +76,8 @@ const config = ref({
 } as popupConfig);
 const eventDate = ref("" as string);
 const objDates= ref([] as dateSet[]);
-const selectedMonth = ref("" as string);
+const selectedMonth = ref([new Date().getFullYear().toString(), (new Date().getMonth()+1).toString().padStart(2, "0")].join("-") as string);
+const selectedWeek = ref('2024-W01' as string);
 const props = defineProps({
   events: Object as PropType<scheduleData[]>
 });
@@ -105,16 +85,17 @@ const emit = defineEmits(['click-day', 'click-event', 'edit-event', 'save-event'
 
 onMounted(async () => {
   getToday();
+  setWeekOfYear(new Date());
 })
 
-watch(props, ()=>{
-  if(props.events!.length > 0)
-    objDates.value = setEvents(getMonthOfDays(year.value, month.value));
-});
+// watch(props, ()=>{
+//   console.log(props.events)
+//   if(props.events)
+//     objDates.value = setEvents(getMonthOfDays(year.value, month.value));
+// });
 
 // function
 function onClickEvent(date:string, e: scheduleData) {
-  console.log(date, e)
   config.value.isVisible = !config.value.isVisible;
   
   if(!config.value.isVisible) {
@@ -152,6 +133,18 @@ function deleteEvent(e: restData) {
   closeEvent();
 }
 
+function setWeekOfYear(date: Date) {
+  let c = new Date(date);
+  let s = new Date(c.getFullYear(), 0, 1);
+  let days = Math.floor(((c as any) - (s as any)) /
+    (24 * 60 * 60 * 1000));
+ 
+  let weekNumber = Math.ceil(days / 7);
+
+  selectedWeek.value = [c.getFullYear(), `W${weekNumber.toString().padStart(2, "0")}`].join("-");
+
+}
+
 function returnStrDate(year: number, month: number, day: number) {
   return [year.toString(), month.toString().padStart(2, '0'), day.toString().padStart(2, '0')].join('-');
 }
@@ -165,15 +158,15 @@ function getToday() {
   today.value = date.getDate(); // 오늘 날짜
   selectedDay.value = date.getDate();
   selectedMonth.value = [year.value, month.value.toString().padStart(2, "0")].join("-");
-  objDates.value= getMonthOfDays(year.value, month.value);
+  // objDates.value = getMonthOfDays(year.value, month.value);
   emit("update-day", getDate(year.value, month.value-1));
 }
 
 function getDate(year: number, month: number) {
   const date = new Date(year, month, 1);
   const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-  const lastDay = new Date(date.getFullYear(), date.getMonth()+1, 0);
-  const date1 = new Date(date.getFullYear(), date.getMonth(), 1-firstDay.getDay());
+  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  const date1 = new Date(date.getFullYear(), date.getMonth(), 1 - firstDay.getDay());
   const date2 = new Date(date.getFullYear(), date.getMonth(), lastDay.getDate()+lastDay.getDay());
 
   return {start: date1, end: date2};
@@ -204,17 +197,35 @@ async function clickDay(value: dateSet) {
   emit("click-day", value);
 };
 
-// 월 이동
+// 날짜 이동
 function calenderData(arg: number) {
+  console.log("calenderData", arg)
   closeEvent();
-  const current = new Date(year.value, month.value - 1);
-  current.setMonth(current.getMonth() + arg);
 
-  year.value = current.getFullYear();
-  month.value = current.getMonth() + 1;
-  selectedMonth.value = [year.value, month.value.toString().padStart(2, "0")].join("-");
-  objDates.value= getMonthOfDays(year.value, month.value);
-  emit("update-day", getDate(year.value, month.value-1));
+  if(calenderType.value == "month") {
+    const current = new Date(year.value, month.value - 1);
+    current.setMonth(current.getMonth() + arg);
+    year.value = current.getFullYear();
+    month.value = current.getMonth() + 1;
+    selectedMonth.value = [year.value, month.value.toString().padStart(2, "0")].join("-");
+    objDates.value= getMonthOfDays(year.value, month.value);
+    emit("update-day", getDate(year.value, month.value-1));
+  } else if (calenderType.value == "week") {
+    year.value = parseInt(selectedWeek.value.split("-")[0]);
+    const week = parseInt(selectedWeek.value.split("W")[1]) + arg;
+    const d = new Date(year.value, 0, 1);
+    const w = d.getTime() + 604800000 * (week - 1);
+    const date1 = new Date(w);
+    const date2 = new Date(w + 518400000);
+    setWeekOfYear(date2);
+    month.value = date2.getMonth() + 1;
+    console.log(date1, selectedWeek.value);
+    const param = {start: date1, end: date2};
+    objDates.value= getWeekOfDays(date1, date2);
+
+    emit("update-day", param);
+  }
+  
 };
 
 // 일자 설정
@@ -246,22 +257,43 @@ function getMonthOfDays(year: number, month: number) {
   }
   return objDates;
 };
-
-// 일정 설정
-function setEvents(dates: dateSet[]) {
-  if(props.events?.length===0) {
-    return dates;
+function getWeekOfDays(date1: Date, date2: Date) {
+  console.log("getWeekOfDays", date1, date2);
+  let objDates = [] as dateSet[];
+  let times = [{}];
+  for(let i = 0; i < 24; i++) {
+    times.push({time: i.toString().padStart(2, "0")});
   }
 
-  dates.forEach((e: dateSet, index: number) => {
-    let t = props.events?.filter((item) =>
-      new Date(convertDatetoString(item.schdtFrom)  + " 00:00") <= new Date(year.value, e.month-1, e.day)
-      && new Date(convertDatetoString(item.schdtTo) + " 00:00") >= new Date(year.value, e.month-1, e.day)
-    );
-    dates[index] = ({...e, event: t});
-  });
-  return dates;
-}
+  for(let j = 0; j < 7; j++) {
+    const year = date1.getFullYear();
+    const month = date1.getMonth();
+    const day = date1.getDate();
+    const date = new Date(year, month, day + j);
+    objDates.push({year: date.getFullYear(), month: date.getMonth()+1, day: date.getDate(), time: times});
+  }
+
+
+  console.log(objDates)
+  return objDates;
+};
+
+
+// 일정 설정
+// function setEvents(dates: dateSet[]) {
+//   if(props.events?.length===0) {
+//     return dates;
+//   }
+
+//   dates.forEach((e: dateSet, index: number) => {
+//     let t = props.events?.filter((item) =>
+//       new Date(convertDatetoString(item.schdtFrom)  + " 00:00") <= new Date(year.value, e.month-1, e.day)
+//       && new Date(convertDatetoString(item.schdtTo) + " 00:00") >= new Date(year.value, e.month-1, e.day)
+//     );
+//     dates[index] = ({...e, event: t});
+//   });
+//   return dates;
+// }
 </script>
 
 <style lang="scss" scoped>
@@ -269,40 +301,14 @@ function setEvents(dates: dateSet[]) {
   border: 1px solid #d7d7d7;
   border-radius: 8px;
   background-color: white;
-  padding-bottom: 1.6em;
+  padding-bottom: 1em;
+
+  >.mainLayout {
+    height: 100%;
+  }
 
   ul {
     list-style-type: none;
-  }
-
-  .month {
-    width: 100%;
-    text-align: center;
-    padding: 0.5em;
-    height: 55px;
-    .next {
-      float: right;
-      padding-top: 0.3em;
-      input {
-        height: 30px;
-      }
-    }
-    .prev {
-      float: left;
-      padding-top: 0.3em;
-    }
-
-    button {
-      border: none;
-      background-color: white;
-      cursor: pointer;
-      height: 30px;
-    }
-
-    .fontsize {
-      font-size: 1.5em;
-      font-weight: bold;
-    }
   }
 
   .weekdays {
@@ -322,8 +328,8 @@ function setEvents(dates: dateSet[]) {
     grid-template-columns: 14.3% 14.3% 14.3% 14.3% 14.3% 14.3% 14.3%;
     grid-auto-rows: minmax(16.6%, auto);
     padding-top: .16em;
-    // padding-bottom: 4%;
-    height: calc(100% - 55px);
+    padding-bottom: 6.8%;
+    height: 100%;
 
     .day {
       // margin-top: .6em;
