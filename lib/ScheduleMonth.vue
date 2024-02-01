@@ -48,8 +48,8 @@
 <script lang="ts" setup>
 import { PropType, onMounted, ref, watch } from 'vue';
 import ScheduleEvent from './ScheduleEvent.vue';
-import { convertDatetoString } from "@/components/rest/schedule/ScheduleDashBoardRest";
-import { type scheduleData, type popupConfig, type restData, type dateSet } from "@/components/type/schedule";
+import { convertDatetoString } from "./ScheduleDashBoardRest";
+import { type scheduleData, type popupConfig, type restData, type dateSet } from "./type/schedule";
 
 const days = ["일", "월", "화", "수", "목", "금", "토"];
 const currentYear = ref(0 as number);
@@ -179,6 +179,8 @@ async function clickDay(value: dateSet) {
 
 // 월 이동
 function calenderData(arg: number) {
+  console.log("calenderData", arg);
+  
   closeEvent();
   const current = new Date(year.value, month.value - 1);
   current.setMonth(current.getMonth() + arg);

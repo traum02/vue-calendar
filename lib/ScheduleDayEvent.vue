@@ -16,8 +16,8 @@
 
 <script lang="ts" setup>
 import { computed, PropType, watch } from 'vue';
-import { convertDatetoString } from '@/components/rest/schedule/ScheduleDashBoardRest';
-import { EVENT_COLORS, type scheduleData } from "@/components/type/schedule";
+import { convertDatetoString } from './ScheduleDashBoardRest';
+import { EVENT_COLORS, type scheduleData } from "./type/schedule";
 
 const props = defineProps({
   events: Object as PropType<scheduleData[]>,
@@ -63,7 +63,7 @@ const defaultColor = EVENT_COLORS.brown;
 const fontSize = "0.688rem";
 
 function onClickEvent() {
-  emit("clickEvent", props.date, props.event);
+  emit("clickEvent", props.date, props.events);
 }
 
 </script>
@@ -83,7 +83,7 @@ function onClickEvent() {
 
   .event-color {
     flex-shrink: 0;
-    background-color: v-bind('props.event?.category??defaultColor');
+    background-color: v-bind('props.events?.category??defaultColor');
     width: 6px;
     height: 6px;
     border-radius: 100%;

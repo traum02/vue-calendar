@@ -6,11 +6,11 @@
       </li>
       <li class="next">
         <button @click="calenderData(-1)">
-          <img src="@/assets/img/common/ico_arrowRight2.png" alt="leftarrow" style="transform: rotate(180deg)"/>
+          <img src="./assets/common/ico_arrowRight2.png" alt="leftarrow" style="transform: rotate(180deg)"/>
         </button>
         <button @click="getToday">금일</button>
         <button @click="calenderData(1)">
-          <img src="@/assets/img/common/ico_arrowRight2.png" alt="rightarrow" />
+          <img src="./assets/common/ico_arrowRight2.png" alt="rightarrow" />
         </button>
         <input v-if="props.calenderType=='month'" class="datepicker" type="month"
           :value="props.selectedMonth"
@@ -30,8 +30,8 @@
 
 <script lang="ts" setup>
 import { PropType, ref } from 'vue';
-import { diffMonth } from "@/components/rest/schedule/ScheduleDashBoardRest";
-import { type scheduleData } from "@/components/type/schedule";
+import { diffMonth } from "./ScheduleDashBoardRest";
+import { type scheduleData } from "./type/schedule";
 
 const props = defineProps({
   events: Object as PropType<scheduleData[]>,
@@ -41,12 +41,6 @@ const props = defineProps({
   month: Number,
   calenderType: String,
 });
-
-const labelButton = {
-  month: "금월",
-  week: "금주",
-  day: "금일",
-}
 
 const selectBoxOption = [
     {label: '월', value: 'month'},

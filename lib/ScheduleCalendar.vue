@@ -194,6 +194,8 @@ async function clickDay(value: dateSet) {
   config.value.readonly = false;
   config.value.isUpdate = false;
 
+  console.log(year.value, config.value);
+
   emit("click-day", value);
 };
 

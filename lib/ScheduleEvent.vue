@@ -12,8 +12,8 @@
 
 <script lang="ts" setup>
 import { computed, PropType } from 'vue';
-import { convertDatetoString } from '@/components/rest/schedule/ScheduleDashBoardRest';
-import { EVENT_COLORS, type scheduleData } from "@/components/type/schedule";
+import { convertDatetoString } from './ScheduleDashBoardRest';
+import { EVENT_COLORS, type scheduleData } from "./type/schedule";
 
 const props = defineProps({
   event: Object as PropType<scheduleData>,

@@ -46,8 +46,8 @@
 <script lang="ts" setup>
 import { PropType, computed, onMounted, ref, watch } from 'vue';
 import Event from './ScheduleDayEvent.vue';
-import { convertDatetoString, diffMonth } from "@/components/rest/schedule/ScheduleDashBoardRest";
-import { type scheduleData, type popupConfig, type restData, type dateSet } from "@/components/type/schedule";
+import { convertDatetoString, diffMonth } from "./ScheduleDashBoardRest";
+import { type scheduleData, type popupConfig, type restData, type dateSet } from "./type/schedule";
 
 const days = ["월", "화", "수", "목", "금", "토", "일"];
 const currentYear = ref(0 as number);
@@ -263,7 +263,7 @@ function getMonthOfDays(year: number, month: number) {
 function getWeekOfDays(date1: Date, date2: Date) {
   console.log("getWeekOfDays", date1, date2);
   let objDates = [] as dateSet[];
-  let times = [];
+  let times = [{}];
   for(let i = 0; i < 24; i++) {
     times.push({time: i.toString().padStart(2, "0")});
   }
